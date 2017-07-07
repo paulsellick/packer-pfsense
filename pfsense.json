@@ -1,159 +1,175 @@
 {
-  "builders": [
-    {
-      "type": "virtualbox-iso",
-        "http_directory": "http",
-        "http_port_min": "8100",
-        "boot_wait": "7s",
-        "boot_command": [
-          "<wait>1",
-          "<wait10><wait><wait>I",
-          "<wait5><tab><tab><tab><wait><enter>",
-          "<wait><enter>",
-          "<wait5><enter>",
-          "<wait10><wait5><enter>",
-          "<wait5><wait><enter>",
-          "<wait10><wait10><wait10><wait10><wait10>",
-          "<wait>n<enter><wait>",
-          "<wait>em0<enter><wait>",
-          "<wait><enter><wait>",
-          "<wait>y<enter>",
-          "<wait10><wait5>",
-          "14<enter>",
-          "<wait>y<enter>",
-          "<wait>8<enter>",
-	  "<wait>pkg_add -r sudo<wait><enter><wait5>",
-	   "<wait>pkg_add -r bash<wait><enter><wait5>",
-	  "<wait>pkg_add -r ruby<enter><wait10><wait10><wait10>",
-	  "<wait>pkg_add -r rubygem-chef-server<wait><enter>",
-	  "<wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10>",
-	  "<wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10><wait10>",
-	  "<wait>pkg_add -r virtualbox-ose-additions<wait><enter>",
-	  "<wait10><wait10><wait10><wait10><wait10><wait10><wait10>",
-          "<wait>rehash<enter>",
-          "<wait>pw usermod root -h 0<wait><enter>",
-	  "<wait>vagrant<enter>", 
-          "<wait>pw adduser vagrant -m -s /usr/local/bin/bash<enter>",
-          "<wait>pw usermod vagrant -h 0<enter>",
-          "<wait>vagrant<enter>",
-          "<wait>pw group mod wheel -m vagrant<enter>",
-          "<wait>echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /usr/local/etc/sudoers<enter>",
-          "<wait>chmod 0440 /usr/local/etc/sudoers<wait><enter>",
-          "<wait5>reboot<enter>"
-        ],
-      "disk_size": 8192,
-      "guest_additions_mode": "disable",
-      "guest_os_type": "FreeBSD",
-      "iso_checksum": "790eb783c175d90109837361c8f78111",
-      "iso_checksum_type": "md5",
-      "iso_urls": [ "http://box.hackeracademy.com/pfSense-LiveCD-2.1.4-RELEASE-i386.iso" ],
-      "shutdown_command": "sudo shutdown -p now",
-      "ssh_port": 22,
-      "ssh_password": "vagrant",
-      "ssh_username": "vagrant",
-      "ssh_wait_timeout": "10000s",
-      "vboxmanage": [
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--memory",
-          "512"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--cpus",
-          "1"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--nic2",
-          "intnet"
-        ]
-      ],
-      "virtualbox_version_file": ".vbox_version",
-      "vm_name": "pfSense"
-    },
-    {
-      "type": "vmware-iso",
-        "http_directory": "http",
-        "http_port_min": "8100",
-        "boot_wait": "10s",
-        "boot_command": [
-          "<wait>1",
-          "<wait10><wait10><wait10>I",
-          "<wait10><wait10><tab><tab><tab><wait><enter>",
-          "<wait><enter>",
-          "<wait5><enter>",
-          "<wait10><wait5><enter>",
-          "<wait5><wait><enter>",
-          "<wait10><wait10><wait10><wait10><wait10><wait10><wait10>",
-          "<wait>n<enter><wait>",
-          "<wait>em0<enter><wait>",
-          "<wait><enter><wait>",
-          "<wait>y<enter>",
-          "<wait10><wait5>",
-          "14<enter>",
-          "<wait>y<enter>",
-          "<wait>8<enter>",
-          "<wait>pkg_add -r sudo<wait><enter><wait5>",
-          "<wait>pkg_add -r bash<wait><enter><wait5>",
-          "<wait>rehash<enter>",
-          "<wait>pw usermod root -h 0<wait><enter>",
-	  "<wait>vagrant<enter>", 
-          "<wait>pw adduser vagrant -m -s /usr/local/bin/bash<enter>",
-          "<wait>pw usermod vagrant -h 0<enter>",
-          "<wait>vagrant<enter>",
-          "<wait>pw group mod wheel -m vagrant<enter>",
-          "<wait>echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /usr/local/etc/sudoers<enter>",
-          "<wait>chmod 0440 /usr/local/etc/sudoers<wait><enter>",
-          "<wait5>reboot<enter>"
-        ],
-      "disk_size": 8192,
-      "guest_os_type": "freeBSD",
-      "iso_checksum": "790eb783c175d90109837361c8f78111",
-      "iso_checksum_type": "md5",
-      "iso_urls": [ "http://box.hackeracademy.com/pfSense-LiveCD-2.1.4-RELEASE-i386.iso" ],
-      "shutdown_command": "sudo shutdown -p now",
-      "ssh_port": 22,
-      "tools_upload_flavor": "freebsd",
-      "ssh_password": "vagrant",
-      "ssh_username": "vagrant",
-      "ssh_wait_timeout": "10000s",
-      "vm_name": "pfSense",
-      "vmx_data": {
-        "ethernet0.present": "TRUE",
-        "ethernet1.present": "TRUE",
-        "memsize": "512",
-        "numvcpus": "1"
-      }
-   
-  }
-  ],
-   "provisioners": [
-    {
-      "type": "file",
-      "source": "http/",
-      "destination": "/home/vagrant"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'vagrant'|sudo -S bash '{{.Path}}'",
-      "pause_before": "5s",
-      "scripts": [
-        "scripts/config.sh",
-        "scripts/chef.sh",
-        "scripts/vmtools.sh",
-        "scripts/vagrant.sh"
-      ]
-    }
-  ],
-  "post-processors": [  
-    {
-      "type": "vagrant",
-	"output" : "pfSense_{{.Provider}}_{{isotime}}.box",
-	"keep_input_artifact": true
-    }
-  ]
+    "variables": {
+        "vm_cpus": "1",
+        "vm_memory": "1024",
+        "headless": "false",
+        "disk_size": "8000",
+        "guest_additions_mode": "disable",
+        "guest_os_type": "FreeBSD_64",
+        "iso_checksum": "6183d0cbacc631eb14cd2c43044b8c40e14f9a16b626977b821acfbb82339d84",
+        "iso_checksum_type": "sha256",
+        "iso_mirror":  "{{env `HOME`}}/Build/repo/iso",
+        "web_mirror":  "http://mirror.optusnet.au/",
+        "iso_path":  "pfSense/downloads",
+        "iso_file":  "pfSense-CE-2.3.4-RELEASE-amd64.iso",
+        "output_name":  "pfsense-CE-2.3.4-RELEASE-amd64.box",
+        "vm_name": "pfSense-CE-2.3.4",
+        "vm_description": "pfSense Community Edition 2.3.4 box",
+        "compression_level": "6",
+        "vm_version": "0.1"
+  	},
+	"builders": [
+        {
+            "type": "virtualbox-iso",
+            "headless": "{{user `headless`}}",
+            "disk_size": "{{user `disk_size`}}",
+            "guest_additions_mode":  "{{user `guest_additions_mode`}}",
+            "guest_os_type": "{{ user `guest_os_type`}}",
+            "iso_checksum": "{{user `iso_checksum`}}",
+            "iso_checksum_type": "{{user `iso_checksum_type`}}",
+            "iso_urls": [ "{{user `iso_mirror`}}/{{user `iso_path`}}/{{user `iso_file`}}" ],
+            "http_directory": "http",
+            "http_port_min": "8100",
+            "boot_wait": "7s",
+            "boot_command": [
+                "<wait>1",
+                "<wait10><wait10>I",
+                "<wait10>",
+                "<tab><tab><tab><wait><enter><wait><enter>",
+                "<wait5><enter>",
+                "<wait10><wait10><enter>",
+                "<wait10><wait10><enter>",
+                "<wait10><wait10><enter>",
+                "<wait10><wait10><wait10><wait10><wait10>",
+                "<wait10>14<enter>",
+                "<wait>y<enter>",
+                "<wait>8<enter>",
+                "<wait>pkg update<wait><enter><wait10><wait10>",
+                "<wait>pkg install -y sudo bash<wait><enter>",
+                "<wait10><wait10><wait10><wait10>",
+                "<wait>rehash<enter>",
+                "<wait>pw usermod root -h 0<wait><enter>",
+                "<wait>vagrant<enter>",
+                "<wait>pw adduser vagrant -m -s /usr/local/bin/bash<enter>",
+                "<wait>pw usermod vagrant -h 0<enter>",
+                "<wait>vagrant<enter>",
+                "<wait>pw group mod wheel -m vagrant<enter>",
+                "<wait>echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /usr/local/etc/sudoers<enter>",
+                "<wait>chmod 0440 /usr/local/etc/sudoers<wait><enter>",
+                "<wait5>reboot<enter>",
+                "<wait10><wait10><wait10><wait10>",
+                "<wait10><wait10><wait10><wait10>",
+                "<wait>8<enter>",
+                "<wait>pfSsh.php playback enableallowallwan<wait><enter>",
+                "<wait>exit<wait><enter>"
+            ],
+            "shutdown_command": "sudo shutdown -p now",
+            "ssh_port": 22,
+            "ssh_password": "vagrant",
+            "ssh_username": "vagrant",
+            "ssh_wait_timeout": "10000s",
+            "vboxmanage": [
+                [ "modifyvm", "{{.Name}}", "--groups", "/packer-build" ],
+                [ "modifyvm", "{{.Name}}", "--memory", "{{user `vm_memory`}}" ],
+                [ "modifyvm", "{{.Name}}", "--cpus", "{{user `vm_cpus`}}" ],
+                [ "modifyvm", "{{.Name}}", "--nic1", "nat" ],
+                [ "modifyvm", "{{.Name}}", "--nic2", "hostonly" ],
+                [ "modifyvm", "{{.Name}}", "--hostonlyadapter2", "vboxnet0" ],
+                [ "modifyvm", "{{.Name}}", "--natpf1", "pf_web,tcp,,3080,,80" ],
+                [ "modifyvm", "{{.Name}}", "--natpf1", "pf_webssl,tcp,,3443,,443" ]
+            ],
+            "virtualbox_version_file": ".vbox_version",
+            "vm_name": "{{user `vm_name`}}"
+        },
+        {
+            "type": "vmware-iso",
+            "headless": "{{user `headless`}}",
+            "disk_size": "{{user `disk_size`}}",
+            "guest_os_type": "{{ user `guest_os_type`}}",
+            "iso_checksum": "{{user `iso_checksum`}}",
+            "iso_checksum_type": "{{user `iso_checksum_type`}}",
+            "iso_urls": [ "{{user `iso_mirror`}}/{{user `iso_path`}}/{{user `iso_file`}}" ],
+            "http_directory": "http",
+            "http_port_min": "8100",
+            "boot_wait": "7s",
+            "boot_command": [
+                "<wait>1",
+                "<wait10><wait10>I",
+                "<wait10>",
+                "<tab><tab><tab><wait><enter><wait><enter>",
+                "<wait5><enter>",
+                "<wait10><wait10><enter>",
+                "<wait10><wait10><enter>",
+                "<wait10><wait10><enter>",
+                "<wait10><wait10><wait10><wait10><wait10>",
+                "<wait10>14<enter>",
+                "<wait>y<enter>",
+                "<wait>8<enter>",
+                "<wait>pkg update<wait><enter><wait10><wait10>",
+                "<wait>pkg install -y sudo bash<wait><enter>",
+                "<wait10><wait10><wait10><wait10>",
+                "<wait>rehash<enter>",
+                "<wait>pw usermod root -h 0<wait><enter>",
+                "<wait>vagrant<enter>",
+                "<wait>pw adduser vagrant -m -s /usr/local/bin/bash<enter>",
+                "<wait>pw usermod vagrant -h 0<enter>",
+                "<wait>vagrant<enter>",
+                "<wait>pw group mod wheel -m vagrant<enter>",
+                "<wait>echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /usr/local/etc/sudoers<enter>",
+                "<wait>chmod 0440 /usr/local/etc/sudoers<wait><enter>",
+                "<wait5>reboot<enter>",
+                "<wait10><wait10><wait10><wait10>",
+                "<wait10><wait10><wait10><wait10>",
+                "<wait>8<enter>",
+                "<wait>pfSsh.php playback enableallowallwan<wait><enter>",
+                "<wait>exit<wait><enter>"
+            ],
+            "shutdown_command": "sudo shutdown -p now",
+            "ssh_port": 22,
+            "tools_upload_flavor": "freebsd",
+            "ssh_password": "vagrant",
+            "ssh_username": "vagrant",
+            "ssh_wait_timeout": "10000s",
+            "vm_name": "{{user `vm_name`}}",
+            "vmx_data": {
+                "ethernet0.present": "TRUE",
+                "ethernet1.present": "TRUE",
+                "memsize": "{{user `vm_memory`}}",
+                "numvcpus": "{{user `vm_cpus`}}"
+            }
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "http/",
+            "destination": "/home/vagrant"
+        },
+        {
+            "type": "shell",
+            "execute_command": "echo 'vagrant'|sudo -S bash '{{.Path}}'",
+            "pause_before": "5s",
+            "scripts": [
+                "scripts/init.sh",
+                "scripts/rc.conf.sh",
+                "scripts/virtualbox.sh",
+                "scripts/vmtools.sh",
+                "scripts/vagrant.sh",
+                "scripts/sshd.sh",
+                "scripts/xml-config.sh",
+                "scripts/cleanup.sh",
+                "scripts/minimize.sh"
+            ]
+        }
+    ],
+    "post-processors": [  
+        {
+            "type": "vagrant",
+            "compression_level": "{{user `compression_level`}}",
+            "output" : "pfSense_{{.Provider}}_{{isotime}}.box",
+            "output": "output/{{user `output_name`}}",
+            "vagrantfile_template": "templates/freebsd.rb",
+            "keep_input_artifact": true
+        }
+    ]
 }
