@@ -72,14 +72,15 @@ sudo sh -c 'cd /tmp && pkg upgrade -y'
 echo 'Initializing the pkg audit database...'
 sudo sh -c 'cd /tmp && pkg audit -F'
 
-sudo sh -c 'cp ~vagrant/config.xml /conf/config.xml'
-
 # Unconditionally remove $GOPATH/pkg every upgrade in order to prevent ABI
 # incompatibilities resulting from automatic upgrades from `lang/go`.
 GOBIN="`which 2>&1 /dev/null go | head -1`"
 if [ -n "${GOBIN}" ]; then
 rm -rf "`${GOBIN} env GOPATH`/pkg"
 fi
+
+sudo sh -c 'cp ~vagrant/config.xml /conf/config.xml'
+sudo sh -c '/etc/rc.reload_all'
 
 # sudo pfSsh.php playback enableallowallwan
 
@@ -123,9 +124,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vbguest.no_remote = true
   end
   # check for the pressence of the vagrant-cachier plugin before setting these variables.
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.scope = :box
-  end
+  # if Vagrant.has_plugin?("vagrant-cachier")
+  #   config.cache.scope = :box
+  # end
 
   # check for the pressence of the vagrant-landrush plugin before setting these variables.
   if Vagrant.has_plugin?("vagrant-landrush")
@@ -149,6 +150,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
   # config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.56.254" 
   # config.vm.network "private_network", ip: "192.168.56.254", adapter: "2"
 
   # Create a public network, which generally matched to bridged network.
